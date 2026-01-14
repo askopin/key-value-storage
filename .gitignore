@@ -1,0 +1,57 @@
+# Swift / iOS / macOS
+
+
+## Build artifacts
+.build/
+DerivedData/
+*.swiftpm/
+Packages/
+/*.gcno
+Docs/
+
+## Xcode
+xcuserdata/
+*.xcscmblueprint
+*.xccheckout
+*.moved-aside
+*.swp
+*~.nib
+
+## Tuist
+.tuist-cache/
+.tuist-bin/
+graph.json
+
+## Testing
+.testresults/
+*.gcov
+*.profdata
+
+## Swift Package Manager
+.swiftpm/
+Package.resolved
+
+## CocoaPods
+Pods/
+*.podspec.checksum
+
+## Logs and temporary files
+*.log
+*.tmp
+*.swp
+*.bak
+*.cache
+
+## Environment
+.env
+.env.*
+!.env.example
+
+## OS files
+.DS_Store
+Thumbs.db
+
+## IDE
+.vscode/
+.idea/
+*.iml
