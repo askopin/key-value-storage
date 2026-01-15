@@ -53,19 +53,22 @@ Dictionary             Prefix Index
 
 ## Design Decisions
 
-## Why Index is not thread safe
+##### Why Tuist
+   - Project management convenience: Allows to keep project settings human readable
+
+##### Why Index is not thread safe
 
 - Performance: Reduces overhead on context switches and locking
-- Simpler Implementation: allows to avoid custom lock managements or handling actor reentrancy
+- Simpler Implementation: Allows to avoid custom lock managements or handling actor reentrancy
 - Access level: Implementation is internal to framework, so if properly handled at KeyValueStorage level, no risk of exposure non-thread safe api to customer
 
 
-### Why Radix Tree?
+##### Why Radix Tree?
 
 - Fast Prefix Search: O(k + m) vs O(n) linear scan (k - max key length, m - number of matches, n - number of entries in storage)
 - Memory Efficient: Compresses single-child chains unlike standard tries
 
-### Why Actors Instead of Locks?
+##### Why Actors Instead of Locks?
 
 - Compiler-Verified Safety: Swift 6 strict concurrency catches data races at compile time
 - Simpler Code: No manual lock management
@@ -75,7 +78,7 @@ Dictionary             Prefix Index
 
 Current implementation has several significant drawbacks due to assignment deadlines
 
-#### `getRandomValue` method is not possible to implement with current signature for potential persistent storage
+##### `getRandomValue` method is not possible to implement with current signature for potential persistent storage
 
 For in memory storage this signature works since all types are preserved while app is running, but for persistent mode this claim is not held, and since swift is a statically typed language, we need some way to provide type stored value is deserialized to at compile time.
 But introducing `getRandomValue<T>(as type: T.Type) async -> T?` signature introduces another dilemma: do we run random over all key-value pairs or only over ones for which value type matches the requested one? 
@@ -83,18 +86,18 @@ In first case it leads to the unobvious behavior: function could return nil even
 
 So, current decision is to keep in-memory only compatible signature.
 
-#### Non-optimal Radix Tree implementation
+##### Non-optimal Radix Tree implementation
 
 Current Radix Tree implementation is far from optimal for several reasons:
 
-#### Non-optimal strings engine
+##### Non-optimal strings engine
 
 Implementation uses default swift strings with unicode-based indexing, uses expensive hasPrefix, commonPrefix operations, even `.count` calculation is O(n) for unicode strings. Also every slice-to-string convert triggers a lot of heap-heavy copying.
 
 **Solution**: 
 - Use byte arrays instead of strings for key management
 
-#### Dictionaries for branches storage
+##### Dictionaries for branches storage
 
 Though storing children using dictionary looks quite natural, it introducing a lot of overhead for hashes calculation, eventual dictionary rebalance etc
 
@@ -102,7 +105,7 @@ Though storing children using dictionary looks quite natural, it introducing a l
 - Use inline arrays + dynamic nodes resizing (Node4 -> Node8 -> Node16) etc instead of dictionaries for children and branch label storage
 
 
-### Index updates slow down put/delete operation
+##### Index updates slow down put/delete operation
 
 The InMemoryStorage actor holds both:
   - storage: [String: any Sendable] - O(1) dictionary operations
